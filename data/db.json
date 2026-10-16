@@ -1,0 +1,18 @@
+{
+  "admin": {},
+  "settings": {},
+  "theme": {
+    "primaryColor": "#816aea",
+    "accentColor": "#645ee1",
+    "bgDark": "#080c14",
+    "bgLight": "#f8fafc",
+    "fontFamily": "'Plus Jakarta Sans', sans-serif",
+    "fontSizeBase": "16px",
+    "headlineWeight": "900"
+  },
+  "hero": {},
+  "about": {},
+  "partners": [],
+  "services": [],
+  "reviews": []
+}

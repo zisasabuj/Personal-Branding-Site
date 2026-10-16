@@ -1,0 +1,214 @@
+﻿<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KABIR | High-Impact Personal Branding & Strategy</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800;900&family=Playfair+Display:wght@700;900&family=Outfit:wght@400;600;800&family=Inter:wght@400;600;800&family=Poppins:wght@400;600;800&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Floating Header / Navbar with Hamburger Support -->
+  <header class="header-nav anim-up">
+    <div class="container" style="position: relative;">
+      <div class="nav-wrap">
+        <a href="/" class="brand-link" id="navBrandLink">
+          <img id="navLogoImg" src="" alt="Brand Logo" class="brand-logo-img" style="display: none;">
+          <span id="navSiteName">KABIR</span>
+        </a>
+        
+        <!-- Desktop Nav -->
+        <nav class="nav-menu">
+          <a href="#about" class="nav-link">About</a>
+          <a href="#services" class="nav-link">Services</a>
+          <a href="#reviews" class="nav-link">Success Stories</a>
+          <a href="/admin.html" class="nav-link" style="color: #818cf8;">Admin</a>
+        </nav>
+
+        <div class="nav-actions">
+          <button class="theme-toggle-btn" onclick="toggleDayNightTheme()" id="themeToggleBtn" title="Toggle Day/Night Mode">☀️</button>
+          <a id="navCalendlyBtn" href="#" target="_blank" class="btn-pill">Book a Consultation</a>
+          
+          <!-- Hamburger Button for Mobile / Tablet -->
+          <button class="hamburger-btn" onclick="toggleMobileMenu()" id="hamburgerBtn" aria-label="Toggle Menu">
+            <span></span>
+            <span></span>
+            <span></span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Mobile Navigation Drawer -->
+      <div class="mobile-nav-drawer" id="mobileNavDrawer">
+        <a href="#about" onclick="toggleMobileMenu()">About Coach</a>
+        <a href="#services" onclick="toggleMobileMenu()">Services</a>
+        <a href="#reviews" onclick="toggleMobileMenu()">Success Stories</a>
+        <a href="/admin.html" style="color: #818cf8;">Admin Portal</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Full-Screen Hero Section (100vh) - Left Spaced -->
+  <section id="home" class="full-screen-hero">
+    <div class="hero-backdrop-layer"></div>
+
+    <div class="container" style="display: flex; height: 100%; flex-direction: column; justify-content: space-between;">
+      <div class="hero-content-left">
+        <h1 id="heroHeadline" class="hero-headline anim-left">
+          You're More Than a Brand.<br>You're a Movement.
+        </h1>
+        <div class="hero-action-row anim-left anim-delay-1">
+          <a id="heroCtaBtn" href="#services" class="btn-hero-cta">
+            <span id="heroCtaText">Request a Call</span>
+            <div class="cta-arrow">&rarr;</div>
+          </a>
+          <p id="heroSummary" class="hero-summary-text">
+            Helping you turn connections into opportunities through authentic branding.
+          </p>
+        </div>
+      </div>
+
+      <!-- Bottom 4 Stats Ticker Dock -->
+      <div class="hero-stats-dock anim-up anim-delay-2">
+        <div class="stat-pill">
+          <div class="stat-icon">👤</div>
+          <div>
+            <h4 id="stat1Num">200+</h4>
+            <p id="stat1Label">Successful Members</p>
+          </div>
+        </div>
+        <div class="stat-pill">
+          <div class="stat-icon">📈</div>
+          <div>
+            <h4 id="stat2Num">6M+</h4>
+            <p id="stat2Label">Followers Generated</p>
+          </div>
+        </div>
+        <div class="stat-pill">
+          <div class="stat-icon">🤝</div>
+          <div>
+            <h4 id="stat3Num">3k+</h4>
+            <p id="stat3Label">Satisfied Clients</p>
+          </div>
+        </div>
+        <div class="stat-pill">
+          <div class="stat-icon">📄</div>
+          <div>
+            <h4 id="stat4Num">500+</h4>
+            <p id="stat4Label">Branding Projects</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Partners & Clients Section -->
+  <section class="partners-section">
+    <div class="container">
+      <div class="partners-title reveal-scroll">Featured In & Trusted By Leaders From</div>
+      <div id="partnersGrid" class="partners-grid reveal-scroll">
+        <!-- Dynamic -->
+      </div>
+    </div>
+  </section>
+
+  <!-- About Section -->
+  <section id="about" class="container about-section">
+    <div class="about-grid">
+      <div class="about-img-box reveal-scroll">
+        <img id="aboutImg" src="" alt="Coach Profile" class="about-img">
+      </div>
+      <div class="reveal-scroll">
+        <span class="about-tag">Personal Branding Coach</span>
+        <h2 id="aboutTitle" class="sec-title">Meet Kabir</h2>
+        <p id="aboutLead" style="font-size: 1.15rem; font-weight: 600; margin-bottom: 1rem; color: var(--text-main);"></p>
+        <p id="aboutBio" style="color: var(--text-muted); line-height: 1.7; margin-bottom: 2rem;"></p>
+        <a id="aboutCalendlyBtn" href="#" target="_blank" class="btn-pill" style="padding: 0.9rem 2rem; font-size: 1rem;">
+          Schedule 1:1 Intro Call &rarr;
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Services Section -->
+  <section id="services" class="services-section">
+    <div class="container">
+      <div style="text-align: center; max-width: 700px; margin: 0 auto;" class="reveal-scroll">
+        <span class="about-tag">Tailored Programs</span>
+        <h2 class="sec-title">Personal Branding Services</h2>
+        <p style="color: var(--text-muted);">Hover or tap on any service card below to inspect full deliverables and scopes.</p>
+      </div>
+      <div id="servicesCardsContainer" class="cards-grid">
+        <!-- Dynamic -->
+      </div>
+    </div>
+  </section>
+
+  <!-- Client Reviews -->
+  <section id="reviews" class="reviews-section">
+    <div class="container">
+      <div style="text-align: center; max-width: 700px; margin: 0 auto;" class="reveal-scroll">
+        <span class="about-tag">Testimonials</span>
+        <h2 class="sec-title">What My Clients Are Saying</h2>
+        <p style="color: var(--text-muted);">Real business ROI achieved through structured personal authority architecture.</p>
+      </div>
+      <div id="reviewsContainer" class="reviews-grid">
+        <!-- Dynamic -->
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-grid reveal-scroll">
+        <div>
+          <h3 id="footerSiteName" style="font-size: 1.5rem; font-weight: 800; margin-bottom: 0.8rem;">KABIR</h3>
+          <p id="footerBio" style="color: var(--text-muted); font-size: 0.92rem; max-width: 380px;"></p>
+        </div>
+        <div>
+          <h4 style="font-size: 1rem; font-weight: 700; margin-bottom: 0.8rem;">Direct Contact</h4>
+          <ul class="footer-contact-list">
+            <li id="footerPhone">Phone: +880 1712-345678</li>
+            <li id="footerEmail">Email: contact@kabirbranding.pro</li>
+            <li id="footerAddress">Address: Gulshan 2, Dhaka</li>
+          </ul>
+        </div>
+        <div>
+          <h4 style="font-size: 1rem; font-weight: 700; margin-bottom: 0.8rem;">Quick Links</h4>
+          <ul class="footer-contact-list">
+            <li><a href="#about">About Coach</a></li>
+            <li><a href="#services">Services</a></li>
+            <li><a href="#reviews">Success Stories</a></li>
+            <li><a href="/admin.html">Admin Portal</a></li>
+          </ul>
+        </div>
+      </div>
+      <div style="text-align: center; border-top: 1px solid var(--border-color); padding-top: 2rem; color: var(--text-muted); font-size: 0.85rem;" id="footerCopyright">
+        &copy; 2026 KABIR. All rights reserved.
+      </div>
+    </div>
+  </footer>
+
+  <!-- Sticky Calendly Bar -->
+  <div class="sticky-calendly-bar">
+    <div class="container sticky-flex">
+      <div style="display: flex; align-items: center; gap: 12px;">
+        <div class="pulse-indicator"></div>
+        <div>
+          <strong style="font-size: 0.95rem; color: var(--text-main);">Private 1:1 Advisory Openings Available</strong>
+          <span style="color: var(--text-muted); font-size: 0.85rem; margin-left: 8px;">Select your time via Calendly</span>
+        </div>
+      </div>
+      <a id="stickyCalendlyBtn" href="#" target="_blank" class="btn-pill">
+        Book in Calendly &rarr;
+      </a>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

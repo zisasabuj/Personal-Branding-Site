@@ -1,0 +1,406 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Executive Admin Control Portal</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .admin-wrap { max-width: 1180px; margin: 2rem auto; padding: 0 1.5rem; }
+    .admin-card { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 20px; padding: 2.2rem; margin-bottom: 2rem; }
+    .tabs-bar { display: flex; gap: 8px; margin-bottom: 2rem; flex-wrap: wrap; }
+    .tab-btn {
+      padding: 0.75rem 1.4rem; border-radius: 12px; font-weight: 700; font-size: 0.9rem;
+      border: 1px solid var(--border-color); background: var(--card-bg); color: var(--text-muted); cursor: pointer; transition: 0.2s;
+    }
+    .tab-btn.active { background: var(--primary-color); color: #fff; border-color: transparent; }
+    .tab-pane { display: none; }
+    .tab-pane.active { display: block; }
+    .form-group { margin-bottom: 1.2rem; }
+    .form-label { display: block; font-size: 0.88rem; font-weight: 700; color: var(--text-main); margin-bottom: 0.4rem; }
+    .input-ctrl, select, textarea {
+      width: 100%; padding: 0.8rem 1rem; border: 1px solid var(--border-color); border-radius: 10px;
+      background: rgba(0,0,0,0.25); color: var(--text-main); font-family: inherit; font-size: 0.95rem; outline: none;
+    }
+    .input-ctrl:focus, select:focus, textarea:focus { border-color: var(--primary-color); }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; }
+    .file-preview { width: 140px; height: 85px; object-fit: cover; border-radius: 10px; border: 1px solid var(--border-color); margin-top: 8px; }
+  </style>
+</head>
+<body>
+
+  <!-- Login Section -->
+  <div id="loginSection" class="container" style="max-width: 440px; margin-top: 6rem;">
+    <div class="admin-card">
+      <h2 style="font-size: 1.6rem; text-align: center; margin-bottom: 0.4rem;">Executive Control</h2>
+      <p style="text-align: center; color: var(--text-muted); font-size: 0.88rem; margin-bottom: 2rem;">Sign in to customize theme, images, partners, and content</p>
+      <form onsubmit="handleAdminLogin(event)">
+        <div class="form-group">
+          <label class="form-label">Username</label>
+          <input type="text" id="adUser" class="input-ctrl" required placeholder="admin">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          <input type="password" id="adPass" class="input-ctrl" required placeholder="••••••••">
+        </div>
+        <button type="submit" class="btn-pill" style="width: 100%; justify-content: center; margin-top: 0.5rem;">Authenticate</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Dashboard Workspace -->
+  <div id="dashboardSection" class="admin-wrap" style="display: none;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+      <div>
+        <h2 style="font-size: 1.8rem; font-weight: 800;">Site Customizer & Control</h2>
+        <p style="color: var(--text-muted); font-size: 0.9rem;">Dynamic Theme Engine, Direct Device File Uploads, and Content Management</p>
+      </div>
+      <div>
+        <a href="/" target="_blank" class="btn-pill" style="background: transparent; border: 1px solid var(--border-color); margin-right: 0.5rem;">View Live Site</a>
+        <button onclick="handleAdminLogout()" class="btn-pill" style="background: #ef4444;">Log Out</button>
+      </div>
+    </div>
+
+    <!-- Navigation Tabs -->
+    <div class="tabs-bar">
+      <button class="tab-btn active" onclick="switchAdminTab('tab-theme')">🎨 Theme & Typography</button>
+      <button class="tab-btn" onclick="switchAdminTab('tab-hero')">🖼️ Hero & Full Screen Image</button>
+      <button class="tab-btn" onclick="switchAdminTab('tab-partners')">🏢 Featured In & Partners</button>
+      <button class="tab-btn" onclick="switchAdminTab('tab-about')">👤 About Coach</button>
+      <button class="tab-btn" onclick="switchAdminTab('tab-services')">📦 Services (Hover Cards)</button>
+      <button class="tab-btn" onclick="switchAdminTab('tab-reviews')">⭐ Client Reviews</button>
+      <button class="tab-btn" onclick="switchAdminTab('tab-footer')">🏷️ Logo & Footer Contacts</button>
+      <button class="tab-btn" onclick="switchAdminTab('tab-security')">⚙️ Calendly & Password</button>
+    </div>
+
+    <!-- TAB 1: Theme & Typography Engine -->
+    <div id="tab-theme" class="tab-pane active">
+      <div class="admin-card">
+        <h3 style="margin-bottom: 0.4rem;">Theme Engine & Typography Settings</h3>
+        <p style="color: var(--text-muted); font-size: 0.88rem; margin-bottom: 1.5rem;">Your selected colors, fonts, and bold weights will dynamically apply across Day & Night modes.</p>
+        <form onsubmit="saveThemeSettings(event)">
+          <div class="grid-2">
+            <div class="form-group">
+              <label class="form-label">Primary Brand Accent Color</label>
+              <input type="color" id="thmPrimary" class="input-ctrl" style="height: 48px; padding: 4px; cursor: pointer;">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Secondary Accent / Glow Color</label>
+              <input type="color" id="thmAccent" class="input-ctrl" style="height: 48px; padding: 4px; cursor: pointer;">
+            </div>
+          </div>
+
+          <div class="grid-2">
+            <div class="form-group">
+              <label class="form-label">Night Mode Background Color</label>
+              <input type="color" id="thmBgDark" class="input-ctrl" style="height: 48px; padding: 4px; cursor: pointer;">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Day Mode Background Color</label>
+              <input type="color" id="thmBgLight" class="input-ctrl" style="height: 48px; padding: 4px; cursor: pointer;">
+            </div>
+          </div>
+
+          <div class="grid-2">
+            <div class="form-group">
+              <label class="form-label">Global Font Family</label>
+              <select id="thmFont" class="input-ctrl">
+                <option value="'Plus Jakarta Sans', sans-serif">Plus Jakarta Sans (Modern Executive)</option>
+                <option value="'Inter', sans-serif">Inter (Clean Tech Look)</option>
+                <option value="'Outfit', sans-serif">Outfit (Vibrant & Geometric)</option>
+                <option value="'Poppins', sans-serif">Poppins (Sleek Rounded)</option>
+                <option value="'Roboto', sans-serif">Roboto (Structured Professional)</option>
+                <option value="'Playfair Display', serif">Playfair Display (Luxury Editorial)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Base Font Size</label>
+              <select id="thmFontSize" class="input-ctrl">
+                <option value="15px">15px (Compact)</option>
+                <option value="16px">16px (Standard Recommended)</option>
+                <option value="17px">17px (Spacious Large)</option>
+                <option value="18px">18px (High Readability)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Headline Font Boldness / Weight</label>
+            <select id="thmWeight" class="input-ctrl">
+              <option value="700">700 (Bold)</option>
+              <option value="800">800 (Extra Bold)</option>
+              <option value="900">900 (Black / Ultra Bold)</option>
+            </select>
+          </div>
+
+          <button type="submit" id="btnSaveTheme" class="btn-pill" style="margin-top: 1rem;">Save Theme & Colors</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- TAB 2: Hero Section & Full Screen Image Upload -->
+    <div id="tab-hero" class="tab-pane">
+      <div class="admin-card">
+        <h3 style="margin-bottom: 0.4rem;">Full-Screen Hero Setup</h3>
+        <p style="color: var(--text-muted); font-size: 0.88rem; margin-bottom: 1.5rem;">Upload background photo directly from your laptop or mobile.</p>
+        <form onsubmit="saveHeroSettings(event)">
+          <div class="form-group">
+            <label class="form-label">Full Screen Background Photo (Upload from Laptop/Mobile)</label>
+            <input type="file" id="heroBgFile" class="input-ctrl" accept="image/*" onchange="previewFile(event, 'heroBgPreview')">
+            <img id="heroBgPreview" src="" alt="Hero BG Preview" class="file-preview" style="width: 220px; height: 120px;">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Hero Main Headline (Multiline Supported)</label>
+            <textarea id="hHeadline" rows="2" class="input-ctrl" required></textarea>
+          </div>
+
+          <div class="grid-2">
+            <div class="form-group">
+              <label class="form-label">Hero Button Text</label>
+              <input type="text" id="hCtaText" class="input-ctrl" required placeholder="Request a Call">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Hero Button Target Link</label>
+              <input type="text" id="hCtaLink" class="input-ctrl" required placeholder="#services">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Concise Service Summary (Beside button, 2-3 lines)</label>
+            <textarea id="hSummary" rows="2" class="input-ctrl" required></textarea>
+          </div>
+
+          <h4 style="margin: 1.5rem 0 0.8rem; font-size: 0.95rem;">Hero Bottom 4 Stats Ticker</h4>
+          <div class="grid-4">
+            <div>
+              <input type="text" id="hStat1Num" class="input-ctrl" placeholder="200+" style="margin-bottom: 4px;">
+              <input type="text" id="hStat1Lbl" class="input-ctrl" placeholder="Successful Members">
+            </div>
+            <div>
+              <input type="text" id="hStat2Num" class="input-ctrl" placeholder="6M+" style="margin-bottom: 4px;">
+              <input type="text" id="hStat2Lbl" class="input-ctrl" placeholder="Followers Generated">
+            </div>
+            <div>
+              <input type="text" id="hStat3Num" class="input-ctrl" placeholder="3k+" style="margin-bottom: 4px;">
+              <input type="text" id="hStat3Lbl" class="input-ctrl" placeholder="Satisfied Clients">
+            </div>
+            <div>
+              <input type="text" id="hStat4Num" class="input-ctrl" placeholder="500+" style="margin-bottom: 4px;">
+              <input type="text" id="hStat4Lbl" class="input-ctrl" placeholder="Branding Projects">
+            </div>
+          </div>
+
+          <button type="submit" id="btnSaveHero" class="btn-pill" style="margin-top: 1.5rem;">Save Hero Setup</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- TAB 3: Featured In & Partners Management -->
+    <div id="tab-partners" class="tab-pane">
+      <div class="admin-card">
+        <h3 style="margin-bottom: 0.4rem;">Featured In & Trusted By Leaders From</h3>
+        <p style="color: var(--text-muted); font-size: 0.88rem; margin-bottom: 1.5rem;">Add companies with an optional logo.</p>
+        
+        <form onsubmit="handleAddPartner(event)" style="background: rgba(0,0,0,0.15); padding: 1.2rem; border-radius: 14px; margin-bottom: 2rem;">
+          <div class="grid-2">
+            <div class="form-group">
+              <label class="form-label">Company / Media Name *</label>
+              <input type="text" id="partnerName" class="input-ctrl" required placeholder="e.g. Forbes Media">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Company Logo (Upload from Device - Optional)</label>
+              <input type="file" id="partnerLogoFile" class="input-ctrl" accept="image/*" onchange="previewFile(event, 'partnerLogoPreview')">
+              <img id="partnerLogoPreview" src="" alt="Preview" class="file-preview" style="height: 36px; display: none;">
+            </div>
+          </div>
+          <button type="submit" class="btn-pill">Add Company</button>
+        </form>
+
+        <h4 style="margin-bottom: 1rem;">Active Featured Brands:</h4>
+        <div id="partnersAdminList" style="display: flex; flex-direction: column; gap: 10px;"></div>
+      </div>
+    </div>
+
+    <!-- TAB 4: About Coach -->
+    <div id="tab-about" class="tab-pane">
+      <div class="admin-card">
+        <h3 style="margin-bottom: 0.4rem;">About Section Details</h3>
+        <p style="color: var(--text-muted); font-size: 0.88rem; margin-bottom: 1.5rem;">Upload coach picture directly from device and edit the narrative bio.</p>
+        <form onsubmit="saveAboutSettings(event)">
+          <div class="form-group">
+            <label class="form-label">Coach Profile Photo (Upload from Laptop/Mobile)</label>
+            <input type="file" id="aboutPhotoFile" class="input-ctrl" accept="image/*" onchange="previewFile(event, 'aboutPhotoPreview')">
+            <img id="aboutPhotoPreview" src="" alt="About Preview" class="file-preview" style="width: 100px; height: 100px; border-radius: 50%;">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Section Title</label>
+            <input type="text" id="abTitle" class="input-ctrl" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Lead Subtitle</label>
+            <input type="text" id="abLead" class="input-ctrl" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Full Bio Narrative</label>
+            <textarea id="abBio" rows="4" class="input-ctrl" required></textarea>
+          </div>
+          <button type="submit" id="btnSaveAbout" class="btn-pill">Save About Info</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- TAB 5: Services (Cards with Hover Reveal, No Price) -->
+    <div id="tab-services" class="tab-pane">
+      <div class="admin-card">
+        <h3 id="srvFormTitle" style="margin-bottom: 0.4rem;">Add Strategic Service</h3>
+        <p style="color: var(--text-muted); font-size: 0.88rem; margin-bottom: 1.5rem;">Configure card short summary and full hover-reveal scope (No price needed).</p>
+        <form id="serviceForm" onsubmit="handleSaveService(event)">
+          <input type="hidden" id="srvEditId">
+          <div class="grid-2">
+            <div class="form-group">
+              <label class="form-label">Service Title *</label>
+              <input type="text" id="srvTitle" class="input-ctrl" required placeholder="e.g. Executive Identity Architecture">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Category Badge</label>
+              <input type="text" id="srvCategory" class="input-ctrl" placeholder="e.g. Core Strategy">
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Front Short Description (Visible on card) *</label>
+            <textarea id="srvShortDesc" rows="2" class="input-ctrl" required></textarea>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Detailed Scope (Revealed when card is hovered) *</label>
+            <textarea id="srvFullDetails" rows="3" class="input-ctrl" required></textarea>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Key Features (Comma separated)</label>
+            <input type="text" id="srvFeatures" class="input-ctrl" placeholder="360° Presence Audit, Scripting, Content Playbook">
+          </div>
+          <div style="display: flex; gap: 10px;">
+            <button type="submit" id="srvSubmitBtn" class="btn-pill">Save Service</button>
+            <button type="button" id="srvCancelBtn" onclick="resetServiceForm()" class="btn-pill" style="background: transparent; border: 1px solid var(--border-color); display: none;">Cancel</button>
+          </div>
+        </form>
+
+        <h4 style="margin: 2.5rem 0 1rem;">Active Live Services:</h4>
+        <div id="servicesAdminList" style="display: flex; flex-direction: column; gap: 10px;"></div>
+      </div>
+    </div>
+
+    <!-- TAB 6: Client Reviews -->
+    <div id="tab-reviews" class="tab-pane">
+      <div class="admin-card">
+        <h3 id="revFormTitle" style="margin-bottom: 0.4rem;">Add Client Review</h3>
+        <p style="color: var(--text-muted); font-size: 0.88rem; margin-bottom: 1.5rem;">Add verified testimonials with client name, designation, rating, and feedback comment.</p>
+        <form id="reviewForm" onsubmit="handleSaveReview(event)">
+          <input type="hidden" id="revEditId">
+          <div class="grid-2">
+            <div class="form-group">
+              <label class="form-label">Client Name *</label>
+              <input type="text" id="revName" class="input-ctrl" required placeholder="Marcus Vance">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Designation / Role *</label>
+              <input type="text" id="revRole" class="input-ctrl" required placeholder="Founder, HyperScale Media">
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Rating (1 to 5 Stars)</label>
+            <select id="revRating" class="input-ctrl">
+              <option value="5">★★★★★ (5 Stars)</option>
+              <option value="4">★★★★☆ (4 Stars)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Client Feedback Comment *</label>
+            <textarea id="revComment" rows="3" class="input-ctrl" required></textarea>
+          </div>
+          <div style="display: flex; gap: 10px;">
+            <button type="submit" id="revSubmitBtn" class="btn-pill">Publish Review</button>
+            <button type="button" id="revCancelBtn" onclick="resetReviewForm()" class="btn-pill" style="background: transparent; border: 1px solid var(--border-color); display: none;">Cancel</button>
+          </div>
+        </form>
+
+        <h4 style="margin: 2.5rem 0 1rem;">Active Client Reviews:</h4>
+        <div id="reviewsAdminList" style="display: flex; flex-direction: column; gap: 10px;"></div>
+      </div>
+    </div>
+
+    <!-- TAB 7: Brand Logo & Footer Contact Settings -->
+    <div id="tab-footer" class="tab-pane">
+      <div class="admin-card">
+        <h3 style="margin-bottom: 0.4rem;">Brand Logo & Footer Contacts</h3>
+        <p style="color: var(--text-muted); font-size: 0.88rem; margin-bottom: 1.5rem;">Upload website logo directly and manage phone, email, office address, and copyright text.</p>
+        <form onsubmit="saveFooterSettings(event)">
+          <div class="grid-2">
+            <div class="form-group">
+              <label class="form-label">Site Name / Brand Text</label>
+              <input type="text" id="setSiteName" class="input-ctrl" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Brand Logo Image (Upload from Laptop/Mobile)</label>
+              <input type="file" id="setLogoFile" class="input-ctrl" accept="image/*" onchange="previewFile(event, 'setLogoPreview')">
+              <img id="setLogoPreview" src="" alt="Logo Preview" class="file-preview" style="height: 36px; display: none;">
+            </div>
+          </div>
+
+          <div class="grid-2">
+            <div class="form-group">
+              <label class="form-label">Contact Phone</label>
+              <input type="text" id="setPhone" class="input-ctrl" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Official Email</label>
+              <input type="email" id="setEmail" class="input-ctrl" required>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Office / Studio Address</label>
+            <input type="text" id="setAddress" class="input-ctrl" required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Footer Brand Bio Summary</label>
+            <textarea id="setFooterBio" rows="2" class="input-ctrl" required></textarea>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Copyright Text</label>
+            <input type="text" id="setCopyright" class="input-ctrl" required>
+          </div>
+
+          <button type="submit" id="btnSaveFooter" class="btn-pill">Save Logo & Footer Details</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- TAB 8: Calendly URL & Password -->
+    <div id="tab-security" class="tab-pane">
+      <div class="admin-card">
+        <h3 style="margin-bottom: 0.4rem;">Calendly URL & Security</h3>
+        <p style="color: var(--text-muted); font-size: 0.88rem; margin-bottom: 1.5rem;">The Calendly booking button remains frozen at the bottom of the screen.</p>
+        <form onsubmit="saveSecuritySettings(event)">
+          <div class="form-group">
+            <label class="form-label">Calendly Booking URL</label>
+            <input type="url" id="setCalendly" class="input-ctrl" required placeholder="https://calendly.com/your-name">
+          </div>
+          <hr style="border: 0; border-top: 1px solid var(--border-color); margin: 1.5rem 0;">
+          <div class="form-group">
+            <label class="form-label">New Password (Optional - Leave blank to keep current)</label>
+            <input type="password" id="setNewPass" class="input-ctrl" placeholder="Enter new password">
+          </div>
+          <button type="submit" class="btn-pill">Update Calendly & Password</button>
+        </form>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="admin.js"></script>
+</body>
+</html>
