@@ -307,7 +307,7 @@ app.put('/api/admin/settings', ah(async (req, res) => {
     const s = db.settings || {};
     if (!db.admin) db.admin = {};
     db.settings = {
-      siteName: req.body.siteName || s.siteName || 'KABIR',
+      siteName: req.body.siteName || s.siteName || 'Kabir Anwar',
       logoImage: req.body.logoBase64 || s.logoImage || '',
       calendlyUrl: req.body.calendlyUrl || s.calendlyUrl || 'https://calendly.com',
       phone: req.body.phone || s.phone || '',
