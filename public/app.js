@@ -1,4 +1,4 @@
-﻿let currentSiteData = {};
+let currentSiteData = {};
 
 function initTheme() {
   const savedTheme = localStorage.getItem('user-theme') || 'dark';
@@ -56,8 +56,8 @@ function renderSite(data) {
   }
 
   const s = data.settings || {};
-  document.getElementById('navSiteName').innerText = s.siteName || 'KABIR';
-  document.getElementById('footerSiteName').innerText = s.siteName || 'KABIR';
+  document.getElementById('navSiteName').innerText = s.siteName || 'Kabir Anwar';
+  document.getElementById('footerSiteName').innerText = s.siteName || 'Kabir Anwar';
   if (s.logoImage) {
     const lImg = document.getElementById('navLogoImg');
     lImg.src = s.logoImage;
@@ -67,7 +67,6 @@ function renderSite(data) {
   const calUrl = s.calendlyUrl || 'https://calendly.com';
   document.getElementById('navCalendlyBtn').href = calUrl;
   document.getElementById('aboutCalendlyBtn').href = calUrl;
-  document.getElementById('stickyCalendlyBtn').href = calUrl;
 
   document.getElementById('footerBio').innerText = s.footerBio || '';
   document.getElementById('footerPhone').innerText = `Phone: ${s.phone || ''}`;
