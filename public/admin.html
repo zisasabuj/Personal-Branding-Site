@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Admin Console</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="admin.css">
+</head>
+<body>
+
+  <!-- ===== Login ===== -->
+  <div class="login" id="loginScreen">
+    <div class="login-art">
+      <div class="logo-mark"><b><svg class="i" viewBox="0 0 24 24" style="color:#fff"><path d="M12 3l2.4 5.3L20 9.2l-4 4 1 5.8-5-2.8-5 2.8 1-5.8-4-4 5.6-.9z"/></svg></b> Admin Console</div>
+      <div>
+        <h1>Run your brand site like a pro.</h1>
+        <p>Edit content, redesign every section live and keep automatic backups of everything you publish.</p>
+      </div>
+      <div class="login-feats">
+        <div><svg class="i" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg> Design Studio with live preview</div>
+        <div><svg class="i" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg> Automatic snapshots before every save</div>
+        <div><svg class="i" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg> Content stored permanently in the cloud</div>
+      </div>
+    </div>
+    <div class="login-form-wrap">
+      <form class="login-card" id="loginForm" autocomplete="on">
+        <h2>Welcome back</h2>
+        <p class="sub">Sign in to manage your website.</p>
+        <div class="field"><label for="adUser">Username</label><input class="inp" id="adUser" name="username" autocomplete="username" required></div>
+        <div class="field"><label for="adPass">Password</label>
+          <div class="pw-wrap"><input class="inp" id="adPass" name="password" type="password" autocomplete="current-password" required>
+            <button type="button" class="eye" id="togglePw" aria-label="Show password"><svg class="i" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button></div>
+        </div>
+        <div class="login-err" id="loginErr" role="alert"></div>
+        <button class="btn primary block" type="submit" id="loginBtn">Sign in</button>
+        <p class="hint" style="margin-top:1.2rem;text-align:center"><a href="/" style="color:var(--brand2)">&larr; Back to website</a></p>
+      </form>
+    </div>
+  </div>
+
+  <!-- ===== App ===== -->
+  <div class="app" id="appShell" hidden>
+    <aside class="sidebar" id="sidebar">
+      <div class="sb-brand">
+        <div class="logo-mark"><b><svg class="i" viewBox="0 0 24 24" style="color:#fff"><path d="M12 3l2.4 5.3L20 9.2l-4 4 1 5.8-5-2.8-5 2.8 1-5.8-4-4 5.6-.9z"/></svg></b></div>
+        <div class="t"><b id="sbName">Admin Console</b><span>Website manager</span></div>
+      </div>
+      <nav class="nav" id="nav"></nav>
+      <div class="sb-foot">
+        <a class="btn block" href="/" target="_blank" rel="noopener" id="viewSite"></a>
+        <button class="btn ghost block" id="logoutBtn"></button>
+      </div>
+    </aside>
+    <div class="main">
+      <div class="topbar">
+        <button class="icon-btn menu-btn" id="menuBtn" aria-label="Menu"><svg class="i" viewBox="0 0 24 24"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button>
+        <div><span class="crumb" id="crumb">Admin</span><h1 id="pageTitle">Overview</h1></div>
+        <div class="sp"></div>
+        <div id="topActions"></div>
+      </div>
+      <div id="view"></div>
+    </div>
+  </div>
+
+  <div class="toasts" id="toasts" aria-live="polite"></div>
+  <script src="fonts.js"></script>
+  <script src="admin.js"></script>
+</body>
+</html>
