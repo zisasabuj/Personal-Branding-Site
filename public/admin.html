@@ -477,10 +477,10 @@
       <p style="text-align: center; color: var(--text-muted); font-size: 0.86rem; margin-bottom: 1.8rem;">
         Sign in to customize theme, layout, review cards &amp; content
       </p>
-      <form onsubmit="handleAdminLogin(event)">
+      <form id="adminLoginForm" action="javascript:void(0);" onsubmit="return handleAdminLogin(event);">
         <div class="form-group">
           <label class="form-label">Admin Username</label>
-          <input type="text" id="adUser" class="input-ctrl" required placeholder="admin" autocomplete="username">
+          <input type="text" id="adUser" class="input-ctrl" required placeholder="admin" autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false">
         </div>
         <div class="form-group">
           <label class="form-label">Password</label>
@@ -489,7 +489,8 @@
             <button type="button" onclick="togglePassVis()" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 1rem;">👁️</button>
           </div>
         </div>
-        <button type="submit" class="btn-primary" style="width: 100%; justify-content: center; margin-top: 0.6rem; padding: 0.85rem;">
+        <div id="loginErrorBox" style="display: none; background: rgba(239, 68, 68, 0.14); border: 1px solid rgba(239, 68, 68, 0.35); color: #fca5a5; padding: 0.65rem 0.9rem; border-radius: 10px; font-size: 0.83rem; font-weight: 600; margin-bottom: 0.8rem;"></div>
+        <button type="submit" id="btnAdminLogin" class="btn-primary" style="width: 100%; justify-content: center; margin-top: 0.4rem; padding: 0.85rem;">
           Sign In to Studio &rarr;
         </button>
       </form>
@@ -1030,15 +1031,9 @@
                 </div>
               </div>
 
-              <div class="grid-2">
-                <div class="form-group">
-                  <label class="form-label">Partners Section Title</label>
-                  <input type="text" id="secPartnersTitle" class="input-ctrl" placeholder="Featured In & Trusted By Leaders From">
-                </div>
-                <div class="form-group">
-                  <label class="form-label">About Section Eyebrow Tag</label>
-                  <input type="text" id="secAboutTag" class="input-ctrl" placeholder="Personal Branding Coach">
-                </div>
+              <div class="form-group">
+                <label class="form-label">Partners Section Title</label>
+                <input type="text" id="secPartnersTitle" class="input-ctrl" placeholder="Featured In & Trusted By Leaders From">
               </div>
 
               <div class="grid-3">
