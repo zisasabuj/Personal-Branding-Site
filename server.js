@@ -229,9 +229,10 @@ app.post('/api/admin/login', ah(async (req, res) => {
   if (tooManyAttempts(ip)) return res.status(429).json({ error: 'Too many failed attempts. Try again in 15 minutes.' });
   const { username, password } = req.body || {};
   const db = await loadData();
-  const u = (db.admin && db.admin.username) || DEFAULT_USER;
-  if (typeof username === 'string' && typeof password === 'string' &&
-      safeEqualStr(username, u) && verifyPassword(password, db.admin)) {
+  const u = ((db.admin && db.admin.username) || DEFAULT_USER).trim().toLowerCase();
+  const cleanUser = typeof username === 'string' ? username.trim().toLowerCase() : '';
+  if (cleanUser && typeof password === 'string' &&
+      safeEqualStr(cleanUser, u) && verifyPassword(password, db.admin)) {
     attempts.delete(ip);
     return res.json({ success: true, token: signToken(u) });
   }
