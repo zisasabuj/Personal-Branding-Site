@@ -27,9 +27,7 @@ app.use(express.urlencoded({ extended: true, limit: '100mb' }));
 app.use(express.static(path.join(__dirname, 'public')));
 
 /* -------------------------------------------------------------------------
-   MongoDB মডেল
-   গুরুত্বপূর্ণ: মডেলের নাম ('SiteData') ও dataId অপরিবর্তিত রাখা হয়েছে,
-   যাতে আপনার বর্তমান Atlas ডাটা হুবহু একই কালেকশন থেকে পড়া যায়।
+   MongoDB মডেল (অপরিবর্তিত রাখা হয়েছে যাতে আগের Atlas ডাটা অক্ষত থাকে)
    ------------------------------------------------------------------------- */
 const siteSchema = new mongoose.Schema({
   dataId: { type: String, default: DOC_ID, unique: true },
@@ -37,7 +35,6 @@ const siteSchema = new mongoose.Schema({
 }, { timestamps: true, minimize: false });
 const SiteModel = mongoose.model('SiteData', siteSchema);
 
-// প্রতিটি সেভের আগের অবস্থার স্ন্যাপশট (আলাদা কালেকশনে)
 const backupSchema = new mongoose.Schema({
   reason: { type: String, default: '' },
   sizeBytes: { type: Number, default: 0 },
@@ -56,7 +53,18 @@ const isPlainObject = v => v && typeof v === 'object' && !Array.isArray(v);
 
 /* ------------------------------ লোকাল ফাইল ------------------------------ */
 function emptySite() {
-  return { admin: {}, settings: {}, theme: {}, hero: {}, about: {}, partners: [], services: [], reviews: [] };
+  return {
+    admin: {},
+    settings: {},
+    theme: {},
+    hero: {},
+    about: {},
+    partners: [],
+    services: [],
+    reviews: [],
+    reviewStyle: {},
+    customizer: {}
+  };
 }
 function readLocalDB() {
   try {
@@ -68,9 +76,9 @@ function readLocalDB() {
 }
 function writeLocalDB(data) {
   const tmp = DB_PATH + '.tmp';
-  if (fs.existsSync(DB_PATH)) fs.copyFileSync(DB_PATH, DB_PATH + '.bak'); // আগের অবস্থা সংরক্ষণ
+  if (fs.existsSync(DB_PATH)) fs.copyFileSync(DB_PATH, DB_PATH + '.bak');
   fs.writeFileSync(tmp, JSON.stringify(data, null, 2), 'utf8');
-  fs.renameSync(tmp, DB_PATH); // অ্যাটমিক রিপ্লেস
+  fs.renameSync(tmp, DB_PATH);
 }
 
 /* ------------------------------ ডাটা লোড/সেভ ------------------------------ */
@@ -83,7 +91,6 @@ function assertMongoReady() {
 async function loadData() {
   if (!USE_MONGO) return readLocalDB();
   assertMongoReady();
-  // $setOnInsert: ডকুমেন্ট না থাকলেই কেবল তৈরি হবে, থাকলে কখনোই ওভাররাইট করবে না
   const doc = await SiteModel.findOneAndUpdate(
     { dataId: DOC_ID },
     { $setOnInsert: { content: readLocalDB() } },
@@ -100,14 +107,13 @@ async function pruneBackups() {
 async function saveData(data, reason) {
   const size = Buffer.byteLength(JSON.stringify(data));
   if (size > MAX_DOC_BYTES) {
-    throw httpError(413, `Site data would be ${(size / 1048576).toFixed(1)} MB, above the safe ${MAX_DOC_BYTES / 1048576} MB limit (MongoDB single-document cap). Nothing was saved. Use smaller / compressed images.`);
+    throw httpError(413, `Site data would be ${(size / 1048576).toFixed(1)} MB, above the safe ${MAX_DOC_BYTES / 1048576} MB limit. Nothing was saved. Use smaller / compressed images.`);
   }
   if (!USE_MONGO) {
     writeLocalDB(data);
     return;
   }
   assertMongoReady();
-  // ১) বর্তমান ডাটার স্ন্যাপশট নিন
   const current = await SiteModel.findOne({ dataId: DOC_ID }).lean();
   if (current && current.content && Object.keys(current.content).length) {
     await BackupModel.create({
@@ -117,7 +123,6 @@ async function saveData(data, reason) {
     });
     await pruneBackups();
   }
-  // ২) তারপর নতুন ডাটা সেভ করুন
   await SiteModel.findOneAndUpdate(
     { dataId: DOC_ID },
     { content: data },
@@ -125,7 +130,6 @@ async function saveData(data, reason) {
   );
 }
 
-// একসাথে একাধিক রিকোয়েস্ট এলে read-modify-write যেন একে অপরকে মুছে না দেয়
 let chain = Promise.resolve();
 function withLock(fn) {
   const run = chain.then(() => fn());
@@ -144,7 +148,7 @@ function replaceAll(newData, reason) {
   return withLock(async () => {
     const current = await loadData();
     if (!isPlainObject(newData.admin) || !Object.keys(newData.admin).length) {
-      newData.admin = current.admin || {}; // নিজেকে লক-আউট হওয়া থেকে বাঁচাতে
+      newData.admin = current.admin || {};
     }
     await saveData(newData, reason);
   });
@@ -190,7 +194,6 @@ function verifyPassword(pw, admin) {
     const stored = Buffer.from(parts[2], 'hex');
     return calc.length === stored.length && crypto.timingSafeEqual(calc, stored);
   }
-  // আগের ফরম্যাট (প্লেইন পাসওয়ার্ড) — আপনার বর্তমান পাসওয়ার্ড অপরিবর্তিত থাকে
   return safeEqualStr(pw, admin.password || DEFAULT_PASS);
 }
 function requireAuth(req, res, next) {
@@ -200,7 +203,6 @@ function requireAuth(req, res, next) {
   next();
 }
 
-// লগইন ব্রুট-ফোর্স সীমা: ১৫ মিনিটে ১০ বার ব্যর্থ হলে ব্লক
 const attempts = new Map();
 function tooManyAttempts(ip) {
   const rec = attempts.get(ip);
@@ -218,7 +220,7 @@ app.get('/healthz', (req, res) => res.json({ ok: true, mongo: USE_MONGO ? mongoo
 
 app.get('/api/site-data', ah(async (req, res) => {
   const data = await loadData();
-  const { admin, ...publicData } = data; // অ্যাডমিন ইউজারনেম/পাসওয়ার্ড কখনোই পাবলিকে যাবে না
+  const { admin, ...publicData } = data;
   res.json(publicData);
 }));
 
@@ -237,21 +239,38 @@ app.post('/api/admin/login', ah(async (req, res) => {
   return res.status(401).json({ error: 'Invalid username or password' });
 }));
 
-/* ------------------- এর পর থেকে সব /api/admin/* এ লগইন বাধ্যতামূলক ------------------- */
+/* ------------------- অ্যাডমিন প্রোটেক্টেড রুট ------------------- */
 app.use('/api/admin', requireAuth);
 
-// ১. থিম
+// ১. থিম ও গ্লোবাল স্টাইল (WordPress Global Customizer)
 app.put('/api/admin/theme', ah(async (req, res) => {
   const theme = await mutate('theme', db => {
     const t = db.theme || {};
+    const b = req.body || {};
     db.theme = {
-      primaryColor: req.body.primaryColor || t.primaryColor || '#6366f1',
-      accentColor: req.body.accentColor || t.accentColor || '#8b5cf6',
-      bgDark: req.body.bgDark || t.bgDark || '#080c14',
-      bgLight: req.body.bgLight || t.bgLight || '#f8fafc',
-      fontFamily: req.body.fontFamily || t.fontFamily || "'Plus Jakarta Sans', sans-serif",
-      fontSizeBase: req.body.fontSizeBase || t.fontSizeBase || '16px',
-      headlineWeight: req.body.headlineWeight || t.headlineWeight || '900'
+      primaryColor: b.primaryColor !== undefined ? b.primaryColor : (t.primaryColor || '#6366f1'),
+      accentColor: b.accentColor !== undefined ? b.accentColor : (t.accentColor || '#8b5cf6'),
+      bgDark: b.bgDark !== undefined ? b.bgDark : (t.bgDark || '#080c14'),
+      bgLight: b.bgLight !== undefined ? b.bgLight : (t.bgLight || '#f8fafc'),
+      cardBgDark: b.cardBgDark !== undefined ? b.cardBgDark : (t.cardBgDark || ''),
+      cardBgLight: b.cardBgLight !== undefined ? b.cardBgLight : (t.cardBgLight || ''),
+      textMainDark: b.textMainDark !== undefined ? b.textMainDark : (t.textMainDark || ''),
+      textMainLight: b.textMainLight !== undefined ? b.textMainLight : (t.textMainLight || ''),
+      textMutedDark: b.textMutedDark !== undefined ? b.textMutedDark : (t.textMutedDark || ''),
+      textMutedLight: b.textMutedLight !== undefined ? b.textMutedLight : (t.textMutedLight || ''),
+      fontFamily: b.fontFamily !== undefined ? b.fontFamily : (t.fontFamily || "'Plus Jakarta Sans', sans-serif"),
+      fontSizeBase: b.fontSizeBase !== undefined ? b.fontSizeBase : (t.fontSizeBase || '16px'),
+      headlineWeight: b.headlineWeight !== undefined ? b.headlineWeight : (t.headlineWeight || '900'),
+      buttonRadius: b.buttonRadius !== undefined ? b.buttonRadius : (t.buttonRadius || '50px'),
+      cardRadius: b.cardRadius !== undefined ? b.cardRadius : (t.cardRadius || '22px'),
+      heroOverlayOpacity: b.heroOverlayOpacity !== undefined ? b.heroOverlayOpacity : (t.heroOverlayOpacity || '0.88'),
+      heroHeadlineSize: b.heroHeadlineSize !== undefined ? b.heroHeadlineSize : (t.heroHeadlineSize || ''),
+      heroHeadlineColor: b.heroHeadlineColor !== undefined ? b.heroHeadlineColor : (t.heroHeadlineColor || ''),
+      heroSummaryColor: b.heroSummaryColor !== undefined ? b.heroSummaryColor : (t.heroSummaryColor || ''),
+      heroBtnBg: b.heroBtnBg !== undefined ? b.heroBtnBg : (t.heroBtnBg || ''),
+      heroBtnColor: b.heroBtnColor !== undefined ? b.heroBtnColor : (t.heroBtnColor || ''),
+      statsDockBg: b.statsDockBg !== undefined ? b.statsDockBg : (t.statsDockBg || ''),
+      statsDockText: b.statsDockText !== undefined ? b.statsDockText : (t.statsDockText || '')
     };
     return db.theme;
   });
@@ -263,19 +282,19 @@ app.put('/api/admin/hero', ah(async (req, res) => {
   const hero = await mutate('hero', db => {
     const h = db.hero || {};
     db.hero = {
-      headline: req.body.headline || h.headline || '',
-      ctaText: req.body.ctaText || h.ctaText || 'Request a Call',
-      ctaLink: req.body.ctaLink || h.ctaLink || '#services',
-      summaryText: req.body.summaryText || h.summaryText || '',
+      headline: req.body.headline !== undefined ? req.body.headline : (h.headline || ''),
+      ctaText: req.body.ctaText !== undefined ? req.body.ctaText : (h.ctaText || 'Request a Call'),
+      ctaLink: req.body.ctaLink !== undefined ? req.body.ctaLink : (h.ctaLink || '#services'),
+      summaryText: req.body.summaryText !== undefined ? req.body.summaryText : (h.summaryText || ''),
       bgImage: req.body.bgImageBase64 || h.bgImage || '',
-      stat1Num: req.body.stat1Num || h.stat1Num || '200+',
-      stat1Label: req.body.stat1Label || h.stat1Label || '',
-      stat2Num: req.body.stat2Num || h.stat2Num || '6M+',
-      stat2Label: req.body.stat2Label || h.stat2Label || '',
-      stat3Num: req.body.stat3Num || h.stat3Num || '3k+',
-      stat3Label: req.body.stat3Label || h.stat3Label || '',
-      stat4Num: req.body.stat4Num || h.stat4Num || '500+',
-      stat4Label: req.body.stat4Label || h.stat4Label || ''
+      stat1Num: req.body.stat1Num !== undefined ? req.body.stat1Num : (h.stat1Num || '200+'),
+      stat1Label: req.body.stat1Label !== undefined ? req.body.stat1Label : (h.stat1Label || ''),
+      stat2Num: req.body.stat2Num !== undefined ? req.body.stat2Num : (h.stat2Num || '6M+'),
+      stat2Label: req.body.stat2Label !== undefined ? req.body.stat2Label : (h.stat2Label || ''),
+      stat3Num: req.body.stat3Num !== undefined ? req.body.stat3Num : (h.stat3Num || '3k+'),
+      stat3Label: req.body.stat3Label !== undefined ? req.body.stat3Label : (h.stat3Label || ''),
+      stat4Num: req.body.stat4Num !== undefined ? req.body.stat4Num : (h.stat4Num || '500+'),
+      stat4Label: req.body.stat4Label !== undefined ? req.body.stat4Label : (h.stat4Label || '')
     };
     return db.hero;
   });
@@ -287,9 +306,9 @@ app.put('/api/admin/about', ah(async (req, res) => {
   const about = await mutate('about', db => {
     const a = db.about || {};
     db.about = {
-      title: req.body.title || a.title || '',
-      leadText: req.body.leadText || a.leadText || '',
-      bio: req.body.bio || a.bio || '',
+      title: req.body.title !== undefined ? req.body.title : (a.title || ''),
+      leadText: req.body.leadText !== undefined ? req.body.leadText : (a.leadText || ''),
+      bio: req.body.bio !== undefined ? req.body.bio : (a.bio || ''),
       image: req.body.imageBase64 || a.image || ''
     };
     return db.about;
@@ -307,18 +326,18 @@ app.put('/api/admin/settings', ah(async (req, res) => {
     const s = db.settings || {};
     if (!db.admin) db.admin = {};
     db.settings = {
-      siteName: req.body.siteName || s.siteName || 'Kabir Anwar',
+      siteName: req.body.siteName !== undefined ? req.body.siteName : (s.siteName || 'Kabir Anwar'),
       logoImage: req.body.logoBase64 || s.logoImage || '',
-      calendlyUrl: req.body.calendlyUrl || s.calendlyUrl || 'https://calendly.com',
-      phone: req.body.phone || s.phone || '',
-      email: req.body.email || s.email || '',
-      address: req.body.address || s.address || '',
-      footerBio: req.body.footerBio || s.footerBio || '',
-      copyright: req.body.copyright || s.copyright || '© 2026 All rights reserved.'
+      calendlyUrl: req.body.calendlyUrl !== undefined ? req.body.calendlyUrl : (s.calendlyUrl || 'https://calendly.com'),
+      phone: req.body.phone !== undefined ? req.body.phone : (s.phone || ''),
+      email: req.body.email !== undefined ? req.body.email : (s.email || ''),
+      address: req.body.address !== undefined ? req.body.address : (s.address || ''),
+      footerBio: req.body.footerBio !== undefined ? req.body.footerBio : (s.footerBio || ''),
+      copyright: req.body.copyright !== undefined ? req.body.copyright : (s.copyright || '© 2026 Kabir Anwar. All rights reserved.')
     };
     if (newPassword) {
       db.admin.passwordHash = hashPassword(newPassword);
-      delete db.admin.password; // প্লেইন পাসওয়ার্ড আর রাখা হবে না
+      delete db.admin.password;
     }
     return db.settings;
   });
@@ -429,25 +448,71 @@ app.delete('/api/admin/reviews/:id', ah(async (req, res) => {
   res.json({ success: true });
 }));
 
-/* ------------------------ ব্যাকআপ ও রিস্টোর (নতুন) ------------------------ */
+// ৮. রিভিউ কার্ড কাস্টমাইজার (WordPress-style Review Card Studio)
+app.put('/api/admin/review-style', ah(async (req, res) => {
+  const reviewStyle = await mutate('review-style', db => {
+    const b = req.body || {};
+    db.reviewStyle = {
+      cardBg: b.cardBg || '',
+      borderColor: b.borderColor || '',
+      borderRadius: b.borderRadius || '20px',
+      cardPadding: b.cardPadding || '28px',
+      cardShadow: b.cardShadow || 'soft',
+      starColor: b.starColor || '#f59e0b',
+      quoteFont: b.quoteFont || '',
+      quoteSize: b.quoteSize || '15px',
+      quoteColor: b.quoteColor || '',
+      quoteItalic: b.quoteItalic !== undefined ? !!b.quoteItalic : true,
+      quoteWeight: b.quoteWeight || '400',
+      nameColor: b.nameColor || '',
+      nameSize: b.nameSize || '16px',
+      roleColor: b.roleColor || '',
+      roleSize: b.roleSize || '13px',
+      layout: b.layout || 'masonry'
+    };
+    return db.reviewStyle;
+  });
+  res.json({ success: true, reviewStyle });
+}));
+
+// ৯. পেজ বিল্ডার ও সেকশন কাস্টমাইজার (WordPress Page Builder)
+app.put('/api/admin/customizer', ah(async (req, res) => {
+  const customizer = await mutate('page-customizer', db => {
+    const b = req.body || {};
+    const validKeys = ['partners', 'about', 'services', 'reviews'];
+    let order = Array.isArray(b.sectionsOrder) ? b.sectionsOrder.filter(k => validKeys.includes(k)) : validKeys;
+    for (const k of validKeys) {
+      if (!order.includes(k)) order.push(k);
+    }
+    db.customizer = {
+      sectionsOrder: order,
+      sectionsVisible: isPlainObject(b.sectionsVisible) ? b.sectionsVisible : { partners: true, about: true, services: true, reviews: true },
+      servicesLayout: b.servicesLayout || 'modal-cards',
+      sectionTexts: isPlainObject(b.sectionTexts) ? b.sectionTexts : {},
+      sectionColors: isPlainObject(b.sectionColors) ? b.sectionColors : {}
+    };
+    return db.customizer;
+  });
+  res.json({ success: true, customizer });
+}));
+
+/* ------------------------ ব্যাকআপ ও রিস্টোর ------------------------ */
 function validateSiteShape(d) {
   if (!isPlainObject(d)) return 'Backup file must be a JSON object.';
   for (const k of ['partners', 'services', 'reviews']) {
     if (d[k] !== undefined && !Array.isArray(d[k])) return `"${k}" must be a list.`;
   }
-  for (const k of ['theme', 'hero', 'about', 'settings']) {
+  for (const k of ['theme', 'hero', 'about', 'settings', 'reviewStyle', 'customizer']) {
     if (d[k] !== undefined && !isPlainObject(d[k])) return `"${k}" must be an object.`;
   }
-  const known = ['theme', 'hero', 'about', 'settings', 'partners', 'services', 'reviews', 'admin'];
+  const known = ['theme', 'hero', 'about', 'settings', 'partners', 'services', 'reviews', 'admin', 'reviewStyle', 'customizer'];
   if (!known.some(k => d[k] !== undefined)) return 'This does not look like a site backup file.';
   return null;
 }
 function normalizeSite(d) {
-  const base = emptySite();
-  return Object.assign(base, d);
+  return Object.assign(emptySite(), d);
 }
 
-// বর্তমান পূর্ণ ডাটা ডাউনলোড (লগইন করা অ্যাডমিন)
 app.get('/api/admin/backup', ah(async (req, res) => {
   const data = await loadData();
   const stamp = new Date().toISOString().slice(0, 10);
@@ -456,7 +521,6 @@ app.get('/api/admin/backup', ah(async (req, res) => {
   res.send(JSON.stringify(data, null, 2));
 }));
 
-// ফাইল থেকে রিস্টোর (রিস্টোরের আগে বর্তমান অবস্থার স্ন্যাপশট নেওয়া হয়)
 app.post('/api/admin/restore', ah(async (req, res) => {
   const problem = validateSiteShape(req.body);
   if (problem) throw httpError(400, problem + ' Nothing was changed.');
@@ -503,7 +567,6 @@ app.use((err, req, res, next) => {
 
 process.on('unhandledRejection', err => console.error('Unhandled rejection:', err));
 
-/* ------------------------------ চালু করা ------------------------------ */
 async function start() {
   if (USE_MONGO) {
     try {
@@ -511,7 +574,6 @@ async function start() {
       console.log('Connected to MongoDB Atlas Cloud Database!');
       console.log('Using database:', mongoose.connection.name);
     } catch (err) {
-      // সংযোগ ছাড়া সার্ভার চালু করলে ফাঁকা ডাটা দেখাত — তাই বন্ধ করে দিচ্ছি
       console.error('MongoDB Connection Error:', err.message);
       process.exit(1);
     }
