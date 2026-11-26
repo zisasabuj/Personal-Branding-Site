@@ -150,7 +150,8 @@ function applyPageCustomizer(c) {
   // 3. Section custom texts
   const tx = c.sectionTexts || {};
   if (tx.partnersTitle) document.getElementById('partnersTitleText').innerText = tx.partnersTitle;
-  if (tx.aboutTag) document.getElementById('aboutTagText').innerText = tx.aboutTag;
+  const aboutTagEl = document.getElementById('aboutTagText');
+  if (aboutTagEl && tx.aboutTag) aboutTagEl.innerText = tx.aboutTag;
   if (tx.servicesTag) document.getElementById('servicesTagText').innerText = tx.servicesTag;
   if (tx.servicesTitle) document.getElementById('servicesTitleText').innerText = tx.servicesTitle;
   if (tx.servicesSubtitle) document.getElementById('servicesSubtitleText').innerText = tx.servicesSubtitle;
@@ -377,6 +378,8 @@ function renderSite(data) {
   const calUrl = s.calendlyUrl || 'https://calendly.com';
   document.getElementById('navCalendlyBtn').href = calUrl;
   document.getElementById('aboutCalendlyBtn').href = calUrl;
+  const mobCal = document.getElementById('mobileCalendlyBtn');
+  if (mobCal) mobCal.href = calUrl;
 
   document.getElementById('footerBio').innerText = s.footerBio || '';
   document.getElementById('footerPhone').innerText = `Phone: ${s.phone || ''}`;
